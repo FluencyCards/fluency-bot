@@ -24,15 +24,19 @@ def send_message(chat_id, text):
     payload = {"chat_id": chat_id, "text": text}
     requests.post(url, json=payload)
 
+@app.route('/', methods=["GET"])
+def index():
+    return "Bot is running!"
+
 @app.route('/', methods=["POST"])
 def webhook():
     data = request.json
-    message = data["message"]["text"]
-    chat_id = data["message"]["chat"]["id"]
 
-    reply = get_chatgpt_response(message)
-    send_message(chat_id, reply)
+    if "message" in data and "text" in data["message"]:
+        message = data["message"]["text"]
+        chat_id = data["message"]["chat"]["id"]
+
+        reply = get_chatgpt_response(message)
+        send_message(chat_id, reply)
 
     return {"ok": True}
-
-app.run(host="0.0.0.0", port=8080)
