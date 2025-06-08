@@ -8,5 +8,5 @@ services:
     envVars:
       - key: TELEGRAM_TOKEN
         value: "8033207565:AAFexAKHfqt5tPIudJDh690D6N8__zRVcKI"
-      - key: OPENAI_API_KEY
-        value: "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"
+      - key: DEEPSEEK_API_KEY
+        value: "sk-12f71c4a17f34129b15c6f468b365d79"
