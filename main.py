@@ -32,17 +32,15 @@ def index():
 def webhook():
     data = request.json
 
-    if "message" in data and "text" in data["message"]:
+    if data and "message" in data and "text" in data["message"]:
         message = data["message"]["text"]
         chat_id = data["message"]["chat"]["id"]
-
         reply = get_chatgpt_response(message)
         send_message(chat_id, reply)
 
     return {"ok": True}
 
-# ✅ ESSA PARTE FAZ TUDO FUNCIONAR NO RENDER
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render define PORT dinamicamente
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
