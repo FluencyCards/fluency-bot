@@ -17,12 +17,14 @@ def get_chatgpt_response(message):
         "messages": [{"role": "user", "content": message}]
     }
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
+    response.raise_for_status()  # Lança erro se a resposta for ruim
     return response.json()['choices'][0]['message']['content'].strip()
 
 def send_message(chat_id, text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
-    requests.post(url, json=payload)
+    response = requests.post(url, json=payload)
+    response.raise_for_status()
 
 @app.route('/', methods=["GET"])
 def index():
@@ -30,17 +32,23 @@ def index():
 
 @app.route('/', methods=["POST"])
 def webhook():
-    data = request.json
+    try:
+        data = request.json
+        print("Recebido do Telegram:", data)  # Log para depuração
 
-    if data and "message" in data and "text" in data["message"]:
-        message = data["message"]["text"]
-        chat_id = data["message"]["chat"]["id"]
-        reply = get_chatgpt_response(message)
-        send_message(chat_id, reply)
+        if "message" in data and "text" in data["message"]:
+            message = data["message"]["text"]
+            chat_id = data["message"]["chat"]["id"]
 
-    return {"ok": True}
+            reply = get_chatgpt_response(message)
+            send_message(chat_id, reply)
+
+        return {"ok": True}
+
+    except Exception as e:
+        print("Erro no webhook:", e)
+        return {"ok": False, "error": str(e)}, 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
